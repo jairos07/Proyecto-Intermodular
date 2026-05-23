@@ -163,8 +163,7 @@ Consulta el archivo PDF incluido para detalles completos sobre:
 
 Jairo Mosteiro Campos
 Estudiante de SMR2 (Sistemas Microinformáticos y Redes)
-IES Lois Peña Novo - 2025
+IES Lois Peña Novo - 2026
 
 ---
 
-Última actualización: Abril 2025
