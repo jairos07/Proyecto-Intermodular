@@ -2,7 +2,7 @@
 <h1 style="">Servidor Multitarea</h1>
 
 ---
-<img src="ies.webp" width="300">
+<img src="img/ies.webp" width="300">
 
 
 </center>
@@ -73,15 +73,12 @@
       - [Verificación interna](#verificación-interna)
     - [Resultados](#resultados)
     - [Ventajas de esta Automatización](#ventajas-de-esta-automatización)
-    - [Conclusión](#conclusión)
   - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
     - [Descripción](#descripción-4)
     - [Layout de la página](#layout-de-la-página)
   - [**Conclusion**](#conclusion)
   - [**Glosario**](#glosario)
     - [Hardware](#hardware)
-    - [Ubuntu server](#ubuntu-server)
-    - [Windows server](#windows-server)
 
 <div style="page-break-after: always;"></div>
 
@@ -597,9 +594,7 @@ Las máquinas están completamente funcionales y conectadas a la red.
    - Administración de infraestructura
    - Automatización de seguridad
 
-### Conclusión
 
-Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en:
 
 ## Web – Página corporativa con Web4Pro
 
@@ -631,6 +626,8 @@ Desde el montaje físico del servidor con componentes reciclados hasta la config
 
 - La implementación de **Active Directory** en Windows Server fue especialmente significativa, ya que es una tecnología ampliamente utilizada en el mundo laboral. Comprender cómo funciona la gestión centralizada de usuarios, equipos y políticas me ha dado una perspectiva más clara de cómo se administran las redes empresariales reales.
 
+- Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en diferentes ambitos desde la ciberseguridad hasta infraestructura en una red 
+
 - El desarrollo de la **página web** con un CMS en mi estadia en la empresa me ayudo a ganar experiencia en el ambito de el desarroyp web.
 
 - El uso de **hardware reciclado** no solo supuso un ahorro económico considerable, sino que también reforzó la conciencia sobre la sostenibilidad en el sector tecnológico.
@@ -645,48 +642,20 @@ En resumen, este proyecto representa una solución integral, realista y económi
 
 A continuación se muestran imágenes del hardware utilizado en el servidor. Todos los componentes han sido reciclados o adquiridos de segunda mano, manteniendo un funcionamiento óptimo.
 
-<img src="Hardware/IMG_2316.jpg">
+<img src="img/Hardware/IMG_2316.jpg">
 
 > Vista general del interior del equipo servidor con los componentes montados.
 
-<img src="Hardware/IMG_2317.jpg">
+<img src="img/Hardware/IMG_2317.jpg">
 
 > Detalle de la placa base Gigabyte GA-AB350-Gaming 3 con el procesador AMD Ryzen 5 3400G instalado.
 
-<img src="Hardware/IMG_2318.jpg">
+<img src="img/Hardware/IMG_2318.jpg">
 
 > Módulos de memoria RAM DDR4 instalados en la placa base (32 GB en total).
 
-<img src="Hardware/IMG_2319.jpg">
+<img src="img/Hardware/IMG_2319.jpg">
 
 > Vista del conjunto completo: fuente de alimentación 750W 80 Plus Bronze, SSD de 500 GB y cableado interno del equipo.
 
 ---
-
-### Ubuntu server
-
-| Término | Definición |
-|---|---|
-| **DHCP** | Dynamic Host Configuration Protocol. Protocolo que asigna automáticamente configuración de red (IP, máscara, gateway, DNS) a los dispositivos conectados. |
-| **DNS** | Domain Name System. Sistema que traduce nombres de dominio legibles (ej: `servidor.empresa.local`) a direcciones IP numéricas. |
-| **Bind9** | Implementación de servidor DNS más utilizada en sistemas Linux/Unix. |
-| **isc-dhcp-server** | Paquete de servidor DHCP para sistemas Linux, desarrollado por el Internet Systems Consortium. |
-| **Netplan** | Herramienta de configuración de red en Ubuntu que utiliza archivos YAML para definir interfaces y sus parámetros. |
-| **Zona directa** | Archivo de zona DNS que resuelve nombres a IPs (registro A). |
-| **Zona inversa** | Archivo de zona DNS que resuelve IPs a nombres (registro PTR). |
-| **Forwarder** | Servidor DNS externo al que se reenvían las consultas que el servidor local no puede resolver (ej: 8.8.8.8 de Google). |
-
----
-
-### Windows server
-
-| Término | Definición |
-|---|---|
-| **Active Directory (AD)** | Servicio de directorio de Microsoft que centraliza la gestión de usuarios, equipos y recursos en una red Windows. |
-| **Controlador de Dominio (DC)** | Servidor que ejecuta Active Directory y autentica a los usuarios y equipos del dominio. |
-| **Dominio** | Conjunto de equipos y usuarios que comparten una base de datos de directorio común y políticas de seguridad centralizadas. |
-| **GPO** | Group Policy Object. Objeto que contiene una o más configuraciones de directiva de grupo que se aplican a usuarios y equipos del dominio. |
-| **OU (Unidad Organizativa)** | Contenedor de Active Directory que agrupa objetos (usuarios, equipos, grupos) para facilitar su administración y la aplicación de GPOs. |
-| **GPMC** | Group Policy Management Console. Herramienta de administración para crear, editar y vincular GPOs en el dominio. |
-| **gpresult** | Comando de Windows que muestra las GPOs aplicadas a un usuario o equipo concreto. |
-
