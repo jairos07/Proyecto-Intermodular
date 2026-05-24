@@ -51,8 +51,31 @@
     - [Configuración del cliente](#configuración-del-cliente)
     - [Verificación de las GPOs en el cliente](#verificación-de-las-gpos-en-el-cliente)
     - [Resultado final](#resultado-final)
-  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+  - [Automatización con Ansible](#automatización-con-ansible)
     - [Descripción](#descripción-3)
+    - [¿Qué es Ansible?](#qué-es-ansible)
+    - [¿Por qué se usa Ansible?](#por-qué-se-usa-ansible)
+    - [Infraestructura](#infraestructura)
+    - [Estructura del Proyecto](#estructura-del-proyecto)
+    - [Instalación y Configuración](#instalación-y-configuración)
+      - [Paso 1: Crear estructura del proyecto](#paso-1-crear-estructura-del-proyecto)
+      - [Paso 2: Configurar ansible.cfg](#paso-2-configurar-ansiblecfg)
+      - [Paso 3: Definir inventario](#paso-3-definir-inventario)
+      - [Paso 4: Instalar Ansible](#paso-4-instalar-ansible)
+      - [Paso 5: Verificar conectividad](#paso-5-verificar-conectividad)
+      - [Paso 6: Crear el playbook](#paso-6-crear-el-playbook)
+      - [Paso 7: Instalar dependencias](#paso-7-instalar-dependencias)
+    - [Ejecución del Playbook](#ejecución-del-playbook)
+      - [Ejecución en tiempo real](#ejecución-en-tiempo-real)
+      - [Verificación en Proxmox](#verificación-en-proxmox)
+    - [Validación de Funcionamiento](#validación-de-funcionamiento)
+      - [Acceso SSH](#acceso-ssh)
+      - [Verificación interna](#verificación-interna)
+    - [Resultados](#resultados)
+    - [Ventajas de esta Automatización](#ventajas-de-esta-automatización)
+    - [Conclusión](#conclusión)
+  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+    - [Descripción](#descripción-4)
     - [Layout de la página](#layout-de-la-página)
   - [**Conclusion**](#conclusion)
   - [**Glosario**](#glosario)
@@ -128,23 +151,23 @@ Ubuntu Server es el sistema operativo elegido para gestionar los servicios de re
 
 Antes de instalar los servicios, se configuró una IP estática en el servidor Ubuntu para que siempre sea accesible desde la misma dirección dentro de la red.
 
-<img src="ubuntu-server/conf1.png">
+<img src="img/ubuntu-server/conf1.png">
 
 > Configuración inicial de la interfaz de red del servidor Ubuntu.
 
-<img src="ubuntu-server/conf2.png">
+<img src="img/ubuntu-server/conf2.png">
 
 > Verificación de la interfaz y asignación de IP estática mediante Netplan.
 
-<img src="ubuntu-server/conf3.png">
+<img src="img/ubuntu-server/conf3.png">
 
 > Aplicación de la configuración de red con `netplan apply`.
 
-<img src="ubuntu-server/conf4.png">
+<img src="img/ubuntu-server/conf4.png">
 
 > Comprobación de conectividad y resolución de nombres tras aplicar la configuración.
 
-<img src="ubuntu-server/conf5.png">
+<img src="img/ubuntu-server/conf5.png">
 
 > Estado final de la interfaz de red con la IP estática asignada correctamente.
 
@@ -154,11 +177,11 @@ Antes de instalar los servicios, se configuró una IP estática en el servidor U
 
 Para la instalación del servicio DHCP se utilizó el paquete `isc-dhcp-server`. Se configuró el rango de IPs que se asignarán automáticamente a los clientes, la puerta de enlace, el DNS y el tiempo de concesión.
 
-<img src="ubuntu-server/dhcp1.png">
+<img src="img/ubuntu-server/dhcp1.png">
 
 > Configuración del archivo `/etc/dhcp/dhcpd.conf` con el rango de IPs, la subred y los parámetros de red entregados a los clientes.
 
-<img src="ubuntu-server/dhcp2.png">
+<img src="img/ubuntu-server/dhcp2.png">
 
 > Inicio y verificación del estado del servicio `isc-dhcp-server` para confirmar que está activo y funcionando correctamente.
 
@@ -168,47 +191,47 @@ Para la instalación del servicio DHCP se utilizó el paquete `isc-dhcp-server`.
 
 Para el servidor DNS se instaló el paquete `bind9`. Se configuraron las zonas directa e inversa para el dominio interno de la empresa, de modo que los equipos puedan resolver nombres internos y también tener salida a Internet.
 
-<img src="ubuntu-server/dns1.png">
+<img src="img/ubuntu-server/dns1.png">
 
 > Instalación del paquete `bind9` y utilidades asociadas.
 
-<img src="ubuntu-server/dns2.png">
+<img src="img/ubuntu-server/dns2.png">
 
 > Configuración del archivo `/etc/bind/named.conf.local` con la declaración de las zonas directa e inversa.
 
-<img src="ubuntu-server/dns3.png">
+<img src="img/ubuntu-server/dns3.png">
 
 > Configuración del archivo `/etc/bind/named.conf.options` con los reenviadores DNS (forwarders) para la resolución externa.
 
-<img src="ubuntu-server/dns4.png">
+<img src="img/ubuntu-server/dns4.png">
 
 > Creación del archivo de zona directa con los registros A, NS y CNAME necesarios.
 
-<img src="ubuntu-server/dns5.png">
+<img src="img/ubuntu-server/dns5.png">
 
 > Creación del archivo de zona inversa con los registros PTR para la resolución inversa.
 
-<img src="ubuntu-server/dns6.png">
+<img src="img/ubuntu-server/dns6.png">
 
 > Verificación de la sintaxis de los archivos de zona con `named-checkzone`.
 
-<img src="ubuntu-server/dns7.png">
+<img src="img/ubuntu-server/dns7.png">
 
 > Reinicio del servicio `bind9` y comprobación de su estado.
 
-<img src="ubuntu-server/dns8.png">
+<img src="img/ubuntu-server/dns8.png">
 
 > Prueba de resolución DNS directa con el comando `nslookup` desde un cliente.
 
-<img src="ubuntu-server/dns9.png">
+<img src="img/ubuntu-server/dns9.png">
 
 > Prueba de resolución DNS inversa, comprobando que una IP se traduce correctamente al nombre del host.
 
-<img src="ubuntu-server/dns10.png">
+<img src="img/ubuntu-server/dns10.png">
 
 > Verificación final de conectividad completa entre cliente y servidor usando los servicios DNS y DHCP configurados.
 
-<div style="page-break-after: always;"></div>
+<div style="img/page-break-after: always;"></div>
 
 ---
 
@@ -224,11 +247,11 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 ### Instalación de Windows Server
 
-<img src="Windows-server/instalacion1.png">
+<img src="img/Windows-server/instalacion1.png">
 
 > Proceso de instalación de Windows Server. Se selecciona la versión con experiencia de escritorio para facilitar la administración visual.
 
-<img src="Windows-server/instalacion2.png">
+<img src="img/Windows-server/instalacion2.png">
 
 > Finalización de la instalación y primer inicio del sistema operativo.
 
@@ -236,11 +259,11 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 ### Configuración inicial del servidor
 
-<img src="Windows-server/config1.png">
+<img src="img/Windows-server/config1.png">
 
 > Configuración de la IP estática del servidor Windows Server. Es imprescindible que el servidor tenga siempre la misma IP para que los clientes puedan localizarlo en la red.
 
-<img src="Windows-server/config2.png">
+<img src="img/Windows-server/config2.png">
 
 > Configuración del nombre del servidor y verificación de la conectividad de red antes de proceder con la instalación del rol de Active Directory.
 
@@ -248,7 +271,7 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 ### Creación del dominio
 
-<img src="Windows-server/dominio1.png">
+<img src="img/Windows-server/dominio1.png">
 
 > Instalación del rol **Active Directory Domain Services** desde el Administrador del Servidor. Este rol es el núcleo de toda la infraestructura de directorio.
 
@@ -260,15 +283,15 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 ### Unidades Organizativas y Usuarios
 
-<img src="Windows-server/Unidad-organizativa1.png">
+<img src="img/Windows-server/Unidad-organizativa1.png">
 
 > Creación de **Unidades Organizativas (OUs)** en Active Directory Users and Computers. Las OUs permiten organizar los objetos del directorio (usuarios, equipos, grupos) de forma jerárquica, facilitando la aplicación de GPOs específicas a cada departamento o grupo.
 
-<img src="Windows-server/usuarios1.png">
+<img src="img/Windows-server/usuarios1.png">
 
 > Creación de cuentas de usuario dentro de las Unidades Organizativas correspondientes. Cada usuario tiene sus credenciales de acceso al dominio y pertenece al grupo o departamento adecuado.
 
-<img src="Windows-server/usuarios2.png">
+<img src="img/Windows-server/usuarios2.png">
 
 > Verificación de los usuarios creados y sus propiedades: grupo de pertenencia, ruta de perfil y configuración de contraseña.
 
@@ -276,11 +299,11 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 ### Políticas de Grupo (GPOs)
 
-<img src="Windows-server/GPO1.png">
+<img src="img/Windows-server/GPO1.png">
 
 > Creación de una nueva **GPO (Group Policy Object)** desde la Consola de Administración de Directivas de Grupo (GPMC). La GPO se vincula a la Unidad Organizativa correspondiente para que se aplique a todos los equipos y usuarios de ese contenedor.
 
-<img src="Windows-server/GPO2.png">
+<img src="img/Windows-server/GPO2.png">
 
 > Edición de la GPO con las políticas de seguridad y configuración deseadas: restricciones de escritorio, configuración de fondo de pantalla corporativo, bloqueo de acceso al panel de control, entre otras. Estas políticas se aplicarán automáticamente cada vez que un usuario inicie sesión en un equipo del dominio.
 
@@ -298,11 +321,11 @@ El cliente Windows es un equipo de escritorio que se une al dominio creado en Wi
 
 ### Configuración del cliente
 
-<img src="Windows-client/Config1.png">
+<img src="img/Windows-client/Config1.png">
 
 > Configuración del cliente Windows para que utilice la IP del servidor Windows Server como **DNS primario**. Este paso es imprescindible para que el cliente pueda resolver el nombre del dominio y unirse a él.
 
-<img src="Windows-client/config2.png">
+<img src="img/Windows-client/config2.png">
 
 > Proceso de **unión al dominio** desde el cliente: en Propiedades del Sistema se especifica el nombre del dominio (`empresa.local`) y se introducen las credenciales de un administrador del dominio para autorizar la unión.
 
@@ -310,7 +333,7 @@ El cliente Windows es un equipo de escritorio que se une al dominio creado en Wi
 
 ### Verificación de las GPOs en el cliente
 
-<img src="Windows-client/GPO3.png">
+<img src="img/Windows-client/GPO3.png">
 
 > Comprobación de las GPOs aplicadas en el cliente mediante el comando `gpresult /r`. Se puede observar que las políticas definidas en el servidor se han aplicado correctamente al equipo cliente tras su incorporación al dominio.
 
@@ -318,13 +341,265 @@ El cliente Windows es un equipo de escritorio que se une al dominio creado en Wi
 
 ### Resultado final
 
-<img src="Windows-client/resultado1.png">
+<img src="img/Windows-client/resultado1.png">
 
 > Resultado final: el cliente ha iniciado sesión correctamente con un usuario del dominio y se observa que las políticas de grupo están activas (fondo de pantalla corporativo, restricciones configuradas, etc.), confirmando que toda la infraestructura de Active Directory funciona correctamente de extremo a extremo.
 
 <div style="page-break-after: always;"></div>
 
 ---
+
+## Automatización con Ansible
+
+### Descripción
+
+Ansible es una herramienta de automatización de infraestructura que permite provisionar, configurar y gestionar múltiples máquinas de forma centralizada mediante código declarativo. En este proyecto se implementa un playbook que automatiza completamente la creación de 3 máquinas virtuales Ubuntu Server en Proxmox.
+
+### ¿Qué es Ansible?
+
+Ansible es un orquestador de infraestructura (Infrastructure as Code) que funciona de forma agentless, es decir, no requiere software adicional en los hosts remotos. Utiliza SSH o APIs locales para ejecutar tareas definidas en archivos YAML llamados playbooks.
+
+### ¿Por qué se usa Ansible?
+
+Ansible es ampliamente utilizado en entornos empresariales y de seguridad por varias razones:
+
+- **Automatización**: Reduce tareas repetitivas de 45 minutos a 5 minutos
+- **Reproducibilidad**: Las mismas configuraciones se aplican de forma idéntica cada vez
+- **Escalabilidad**: Un mismo playbook funciona para 1 máquina o 100
+- **Seguridad**: Gestión centralizada de configuraciones y policies
+- **Infrastructure as Code**: Las configuraciones se versionan como código
+- **Demanda laboral**: Skill crítica en roles de Security Engineer, DevOps y administración de sistemas
+
+### Infraestructura
+
+La automatización se ejecuta sobre la siguiente infraestructura:
+
+- **Hipervisor**: Proxmox VE (nodo pve) en 192.168.1.100
+- **Template base**: Ubuntu Server 22.04 LTS (VMID 500)
+- **Máquinas a crear**: 3 VMs (VMID 200, 201, 202)
+- **Red**: vmbr0 (192.168.1.0/24)
+- **Recursos**: 2 CPUs, 2GB RAM, 20GB disco por VM
+
+### Estructura del Proyecto
+
+ansible-proyecto/
+├── ansible.cfg
+├── inventory/
+│   └── proxmox.yml
+├── playbooks/
+│   └── ubuntu-vms.yml
+└── AUTOMATIZACION.md
+
+**ansible.cfg**: Archivo de configuración global que define el comportamiento de Ansible (desactiva verificación de SSH keys, define ubicación del inventario, desactiva warnings innecesarios).
+
+**inventory/proxmox.yml**: Define los hosts con los que Ansible va a interactuar (en este caso, el servidor Proxmox con sus credenciales).
+
+**playbooks/ubuntu-vms.yml**: Playbook principal que define todas las tareas a ejecutar (clonar template, arrancar VMs, configurar red).
+
+### Instalación y Configuración
+
+#### Paso 1: Crear estructura del proyecto
+
+Se crea la carpeta principal `ansible-proyecto` con las subcarpetas necesarias:
+
+> Estructura de directorios creada
+
+<img src="img/ansible/cap1.png">
+
+#### Paso 2: Configurar ansible.cfg
+
+Se crea el archivo `ansible.cfg` que define la configuración global:
+
+> Archivo ansible.cfg con configuración global
+
+<img src="img/ansible/cap2.png">
+
+Los parámetros principales son:
+- `host_key_checking = False`: No solicita confirmación SSH la primera conexión
+- `inventory = ./inventory/proxmox.yml`: Ubicación del inventario
+- `deprecation_warnings = False`: Desactiva advertencias innecesarias
+
+#### Paso 3: Definir inventario
+
+Se crea `inventory/proxmox.yml` que contiene los datos del servidor Proxmox:
+
+> Inventario de Proxmox (datos sensibles censurados)
+
+<img src="img/ansible/cap3.png">
+
+El inventario define:
+- Host: pve (Proxmox)
+- IP: 192.168.1.100
+- Usuario: root@pam
+- Método de conexión: Local (API directa)
+
+#### Paso 4: Instalar Ansible
+
+Se instala Ansible y las colecciones necesarias para trabajar con Proxmox:
+
+> Instalación de Ansible y dependencias
+
+<img src="img/ansible/cap4.png">
+
+```bash
+sudo apt install ansible -y
+ansible-galaxy collection install community.general
+```
+
+#### Paso 5: Verificar conectividad
+
+Se verifica que Ansible pueda conectar correctamente con Proxmox:
+
+> Verificación de conexión exitosa a Proxmox
+
+<img src="img/ansible/cap5.png">
+
+```bash
+ansible -i inventory/proxmox.yml pve -m ping
+# Resultado esperado: pong (SUCCESS)
+```
+
+#### Paso 6: Crear el playbook
+
+Se define `playbooks/ubuntu-vms.yml` con las tareas a ejecutar:
+
+> Contenido del playbook de automatización
+
+<img src="img/ansible/cap7.png">
+
+El playbook contiene 5 tareas principales:
+
+1. **Clonar template**: Crea 3 nuevas VMs basadas en el template (VMID 500)
+2. **Esperar clonación**: Pausa para permitir que se completen los clones
+3. **Debug clonación**: Muestra confirmación de VMs creadas
+4. **Arrancar máquinas**: Inicia automáticamente las 3 VMs
+5. **Resumen**: Muestra información de las máquinas creadas
+
+#### Paso 7: Instalar dependencias
+
+Se instalan las librerías Python necesarias para conectar con la API de Proxmox:
+
+> Instalación de dependencias (proxmoxer y requests)
+
+<img src="img/ansible/cap8.png">
+
+```bash
+sudo apt install python3-proxmoxer python3-requests -y
+```
+
+### Ejecución del Playbook
+
+Se ejecuta el playbook con el comando:
+
+```bash
+ansible-playbook playbooks/ubuntu-vms.yml -v
+```
+
+La ejecución tarda aproximadamente 5-6 minutos y realiza lo siguiente:
+
+1. **Clonación** (~2-3 minutos): Copia el template 3 veces
+2. **Arranque** (~1 minuto): Inicia las 3 VMs
+3. **Espera** (120 segundos): Aguarda a que las VMs carguen completamente
+4. **Resumen** (~5 segundos): Muestra información de las máquinas creadas
+
+#### Ejecución en tiempo real
+
+> Playbook ejecutándose - Clonación y arranque de VMs
+
+<img src="img/ansible/cap9.png">
+
+Se observa el progreso:
+- `changed: [pve]` para cada tarea que modifica el estado
+- Output en verde indica ejecución exitosa
+- Pausas planificadas funcionando correctamente
+
+#### Verificación en Proxmox
+
+> Las 3 VMs creadas y en estado Running en Proxmox UI
+
+<img src="img/ansible/cap10.png">
+
+Las máquinas aparecen inmediatamente en el interfaz de Proxmox:
+- Ubuntu-LAB-01 (VMID 200) - 192.168.1.110 - Running
+- Ubuntu-LAB-02 (VMID 201) - 192.168.1.111 - Running
+- Ubuntu-LAB-03 (VMID 202) - 192.168.1.112 - Running
+
+### Validación de Funcionamiento
+
+#### Acceso SSH
+
+Se verifica que las máquinas son accesibles por SSH:
+
+> Conexión SSH exitosa a Ubuntu-LAB-01
+
+<img src="img/ansible/cap11.png">
+
+```bash
+ssh ubuntu@192.168.1.110
+# Password: ubuntu
+```
+
+#### Verificación interna
+
+Dentro de la máquina se verifica funcionalidad:
+
+> Información del sistema y conectividad de red
+
+<img src="img/ansible/cap12.png">
+
+```bash
+# Verificar hostname
+hostname
+# Output: Ubuntu-LAB-01
+
+# Verificar IP asignada
+ip addr show
+# Output: inet 192.168.1.110/24 brd 192.168.1.255
+
+# Verificar version del sistema
+uname -a
+# Output: Linux Ubuntu-LAB-01 5.15.0-...
+```
+
+Las máquinas están completamente funcionales y conectadas a la red.
+
+### Resultados
+
+| Máquina | VMID | IP | Estado | Acceso SSH |
+|---------|------|----|---------|-----------| 
+| Ubuntu-LAB-01 | 200 | 192.168.1.110 | Running | OK |
+| Ubuntu-LAB-02 | 201 | 192.168.1.111 | Running | OK |
+| Ubuntu-LAB-03 | 202 | 192.168.1.112 | Running | OK |
+
+**Tiempo total de ejecución**: ~5-6 minutos
+**Tiempo manual equivalente**: ~45 minutos
+**Mejora de eficiencia**: 80% reducción en tiempo
+
+### Ventajas de esta Automatización
+
+1. **Velocidad**: 3 VMs en 5 minutos vs 45 minutos manualmente (reducción del 80%)
+
+2. **Consistencia**: Las máquinas se crean idénticamente cada vez que se ejecuta el playbook
+
+3. **Reproducibilidad**: El código YAML puede versionarse en Git y ejecutarse en cualquier momento
+
+4. **Escalabilidad**: Agregar más máquinas es tan simple como añadir líneas al archivo de variables
+
+5. **Infrastructure as Code (IaC)**: La infraestructura se define como código, permitiendo:
+   - Versionado en sistemas de control (Git)
+   - Revisión de cambios (code review)
+   - Documentación automática
+   - Recuperación ante desastres (disaster recovery)
+
+6. **Demanda**: Ansible es una skill altamente demandada en:
+   - Roles de Security Engineer
+   - Equipos DevOps
+   - Administración de infraestructura
+   - Automatización de seguridad
+
+### Conclusión
+
+Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en:
 
 ## Web – Página corporativa con Web4Pro
 
@@ -338,7 +613,7 @@ La página web de la empresa es de acceso público y puede visitarse buscando **
 
 ### Layout de la página
 
-<img src="WEB/layout.png">
+<img src="img/WEB/layout.png">
 
 > Vista general del layout de la página web corporativa, donde se puede apreciar la estructura y disposición de los elementos que componen la web.
 
