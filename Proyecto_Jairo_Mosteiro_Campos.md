@@ -73,8 +73,31 @@
       - [Verificación interna](#verificación-interna)
     - [Resultados](#resultados)
     - [Ventajas de esta Automatización](#ventajas-de-esta-automatización)
-  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+  - [pfSense – Firewall y seguridad de red](#pfsense--firewall-y-seguridad-de-red)
     - [Descripción](#descripción-4)
+    - [Instalación de pfSense](#instalación-de-pfsense)
+      - [Primer arranque](#primer-arranque)
+      - [Proceso de instalación](#proceso-de-instalación)
+    - [Configuración inicial de interfaces (Consola)](#configuración-inicial-de-interfaces-consola)
+      - [Detección de interfaces](#detección-de-interfaces)
+      - [Sistema arrancado – menú principal](#sistema-arrancado--menú-principal)
+      - [Configuración de IP estática en la interfaz WAN](#configuración-de-ip-estática-en-la-interfaz-wan)
+      - [Instalación de Tailscale](#instalación-de-tailscale)
+    - [Configuración via WebConfigurator](#configuración-via-webconfigurator)
+      - [Paso 1: Bienvenida al asistente](#paso-1-bienvenida-al-asistente)
+      - [Paso 2: Información general](#paso-2-información-general)
+      - [Paso 3: Servidor de tiempo (NTP)](#paso-3-servidor-de-tiempo-ntp)
+      - [Paso 4: Configuración de la interfaz WAN](#paso-4-configuración-de-la-interfaz-wan)
+      - [Paso 5: Contraseña de administrador](#paso-5-contraseña-de-administrador)
+      - [Paso 6: Asistente completado](#paso-6-asistente-completado)
+    - [Dashboard](#dashboard)
+    - [Configuración del Firewall – Reglas WAN](#configuración-del-firewall--reglas-wan)
+      - [Regla 1: Permitir DNS desde WAN al servidor Ubuntu](#regla-1-permitir-dns-desde-wan-al-servidor-ubuntu)
+      - [Regla 2: Permitir SSH al servidor Ubuntu](#regla-2-permitir-ssh-al-servidor-ubuntu)
+      - [Regla 3: Denegación por defecto](#regla-3-denegación-por-defecto)
+    - [Resultado final de las reglas](#resultado-final-de-las-reglas)
+  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+    - [Descripción](#descripción-5)
     - [Layout de la página](#layout-de-la-página)
   - [**Conclusion**](#conclusion)
   - [**Glosario**](#glosario)
@@ -86,7 +109,7 @@
 
 - Este proyecto consiste en el diseño e implementación de un servidor multitarea orientado a pequeñas y medianas empresas (PYMES), cuyo objetivo principal es ofrecer una solución integral, económica y funcional para la gestión de los servicios básicos de una red empresarial.
 
-- La infraestructura del servidor se compone de varios sistemas y servicios que trabajan de forma conjunta. En primer lugar, se utiliza un servidor basado en Ubuntu Server, encargado de proporcionar los servicios de DNS (Domain Name System) y DHCP (Dynamic Host Configuration Protocol). Estos servicios permiten, respectivamente, la correcta resolución de nombres dentro de la red y la asignación automática de direcciones IP a los dispositivos conectados, facilitando así la administración y organización de la red interna de la empresa.
+- La infraestructura del servidor se compone de varios sistemas y servicios que trabajan de forma conjunta. En primer lugar, se utiliza proxmox para virtualizar los SO, pfsense como firewall, un servidor basado en Ubuntu Server, encargado de proporcionar los servicios de DNS (Domain Name System) y DHCP (Dynamic Host Configuration Protocol). Estos servicios permiten, respectivamente, la correcta resolución de nombres dentro de la red y la asignación automática de direcciones IP a los dispositivos conectados, facilitando así la administración y organización de la red interna de la empresa.
 
 - Además, el proyecto incorpora un servidor Windows Server sobre el cual se configura Active Directory Domain Services (AD DS) junto con Políticas de Grupo (GPOs), que permiten gestionar de forma centralizada los equipos y usuarios que forman parte del dominio empresarial.
 
@@ -594,11 +617,216 @@ Las máquinas están completamente funcionales y conectadas a la red.
    - Administración de infraestructura
    - Automatización de seguridad
 
+<div style="page-break-after: always;"></div>
 
+---
+
+## pfSense – Firewall y seguridad de red
+
+### Descripción
+
+pfSense es un sistema operativo basado en FreeBSD orientado específicamente a funcionar como **firewall** y **router**. En este proyecto se virtualiza sobre Proxmox como una máquina más de la infraestructura, actuando como punto de control y seguridad entre la red interna del servidor y el exterior.
+
+La elección de pfSense se debe a que es una de las soluciones de firewall de código abierto más utilizadas tanto en entornos domésticos como empresariales. Su interfaz web (**WebConfigurator**) permite gestionar todas las reglas de cortafuegos, interfaces de red y servicios de forma intuitiva sin necesidad de conocer en profundidad el sistema FreeBSD subyacente. Además, cuenta con una comunidad enorme y documentación extensa, lo que lo convierte en una opción muy sólida tanto para entornos de laboratorio como de producción.
+
+---
+
+### Instalación de pfSense
+
+#### Primer arranque
+
+La instalación de pfSense comienza desde la imagen ISO montada en la máquina virtual de Proxmox. Al arrancar aparece el menú de boot donde se selecciona la opción por defecto (**Boot Multi user**) para iniciar el proceso de instalación.
+
+<img src="img/pfsense/cap1.png">
+
+> Pantalla de bienvenida del instalador de pfSense con las opciones de arranque disponibles.
+
+#### Proceso de instalación
+
+El instalador extrae automáticamente los archivos del sistema operativo. El proceso tarda pocos minutos dependiendo del almacenamiento asignado a la máquina virtual.
+
+<img src="img/pfsense/cap2.png">
+
+> Progreso de la extracción de archivos del sistema durante la instalación de pfSense.
+
+---
+
+### Configuración inicial de interfaces (Consola)
+
+Una vez instalado el sistema, pfSense arranca e inicia la configuración de las interfaces de red. Esta parte se realiza directamente desde la consola, antes de acceder al panel web.
+
+#### Detección de interfaces
+
+Al detectar que las interfaces configuradas en la imagen no coinciden con las disponibles en la VM (el sistema esperaba `em0` y `em1` pero el adaptador VirtIO se llama `vtnet0`), pfSense lanza automáticamente el proceso de reasignación. Se responde `n` a la pregunta de configurar VLANs y se usa `a` para que el sistema detecte automáticamente la interfaz WAN.
+
+<img src="img/pfsense/cap3.png">
+
+> Configuración inicial de interfaces por consola. El sistema detecta el adaptador VirtIO (`vtnet0`) y solicita asignar qué interfaz actuará como WAN.
+
+#### Sistema arrancado – menú principal
+
+Tras la configuración inicial de interfaces, pfSense arranca completamente con todos sus servicios activos y muestra el menú principal de consola. En este punto, la interfaz WAN tiene una IP asignada por DHCP (`192.168.100.12/24`) de forma temporal.
+
+<img src="img/pfsense/cap4.png">
+
+> Proceso de arranque del sistema con todos los servicios iniciándose correctamente: WAN, firewall, DNS Resolver, CARP, syslog, etc.
+
+<img src="img/pfsense/cap5.png">
+
+> Menú principal de pfSense en consola (versión **2.7.2-RELEASE**). Se puede ver la WAN con IP `192.168.100.12/24` asignada por DHCP y todas las opciones de administración disponibles.
+
+#### Configuración de IP estática en la interfaz WAN
+
+Desde el menú principal se selecciona la opción **2 (Set interface(s) IP address)** para asignar una IP estática a la interfaz WAN. El firewall necesita una dirección fija para ser siempre localizable en la red, por lo que se configura la IP `192.168.100.3` con máscara `/24`.
+
+<img src="img/pfsense/cap6.png">
+
+> Configuración de la IP estática de la interfaz WAN: se introduce `192.168.100.3` como dirección IPv4 y la máscara de subred `/24` (255.255.255.0).
+
+<img src="img/pfsense/cap7.png">
+
+> Finalización de la configuración WAN estática: se descarta IPv6 por DHCP, se mantiene el servidor DHCP desactivado en WAN y se conserva HTTPS para el WebConfigurator. La IP queda fijada definitivamente en `192.168.100.3/24`.
+
+<img src="img/pfsense/cap8.png">
+
+> En una segunda pasada por la configuración se habilita el servidor DHCP en WAN con rango `192.168.100.20–192.168.100.30` y acceso HTTP al WebConfigurator, lo que permite una primera conexión cómoda desde la red local antes de aplicar las restricciones de seguridad finales.
+
+#### Instalación de Tailscale
+
+Desde la opción **8 (Shell)** del menú principal se instala el paquete **Tailscale** mediante el gestor de paquetes nativo de FreeBSD. Tailscale es una VPN mesh que permite acceso remoto seguro al firewall sin necesidad de abrir puertos adicionales en la red, muy útil para administración desde fuera de la red local.
+
+<img src="img/pfsense/cap9.png">
+
+> Instalación de Tailscale desde la shell de pfSense con el comando `pkg install -y tailscale`.
+
+---
+
+### Configuración via WebConfigurator
+
+Con la IP estática fijada, se accede al panel de administración web de pfSense desde un navegador en la red local (`https://192.168.100.3/`). Al entrar por primera vez, el sistema lanza automáticamente un asistente de configuración inicial de 9 pasos.
+
+#### Paso 1: Bienvenida al asistente
+
+<img src="img/pfsense/cap10.png">
+
+> Pantalla de bienvenida del asistente de configuración inicial (pfSense Setup Wizard). El sistema advierte que la contraseña del administrador sigue siendo la predeterminada y que debe cambiarse.
+
+#### Paso 2: Información general
+
+Se configura el nombre del host (`pfSense`), el dominio interno (`smr.local`) y el servidor DNS primario (`192.168.100.100`), que corresponde al servidor Ubuntu que actúa como DNS en la infraestructura.
+
+<img src="img/pfsense/cap11.png">
+
+> Configuración del hostname `pfSense`, dominio `smr.local` y DNS primario apuntando al servidor Ubuntu (`192.168.100.100`).
+
+#### Paso 3: Servidor de tiempo (NTP)
+
+Se mantiene el servidor NTP por defecto de pfSense y se selecciona `Europe/Madrid` como zona horaria, la adecuada para el entorno del proyecto.
+
+<img src="img/pfsense/cap12.png">
+
+> Configuración del servidor NTP (`2.pfsense.pool.ntp.org`) y zona horaria `Europe/Madrid`.
+
+#### Paso 4: Configuración de la interfaz WAN
+
+Se confirma y aplica la configuración de la interfaz WAN con IP estática. Se introduce la dirección `192.168.100.3`, máscara `/24` y la puerta de enlace `192.168.100.100`.
+
+<img src="img/pfsense/cap13.png">
+
+> Configuración de la interfaz WAN como estática: IP `192.168.100.3`, máscara `/24` y upstream gateway `192.168.100.100`.
+
+#### Paso 5: Contraseña de administrador
+
+Se establece una contraseña segura para el usuario `admin` del WebConfigurator. Este paso es fundamental ya que pfSense advierte desde el primer acceso que la contraseña por defecto debe cambiarse cuanto antes.
+
+<img src="img/pfsense/cap14.png">
+
+> Establecimiento de la contraseña de administrador para el acceso al WebConfigurator y SSH.
+
+#### Paso 6: Asistente completado
+
+Al finalizar los 9 pasos, pfSense confirma que la configuración inicial ha sido aplicada y el sistema está listo para su uso.
+
+<img src="img/pfsense/cap15.png">
+
+> Pantalla final del asistente de configuración (paso 9/9): pfSense queda configurado y operativo.
+
+---
+
+### Dashboard
+
+Una vez completado el asistente, se accede al dashboard principal donde se puede ver toda la información del sistema: versión del software, interfaces de red activas con sus IPs, uptime, servidores DNS configurados y el estado general del firewall.
+
+<img src="img/pfsense/cap16.png">
+
+> Dashboard de pfSense tras la configuración inicial. Se observan las interfaces WAN (`192.168.100.3`) y LAN (`192.168.1.188`) activas, los servidores DNS y la información del sistema virtualizado sobre QEMU.
+
+---
+
+### Configuración del Firewall – Reglas WAN
+
+La parte más importante de pfSense es la gestión de las reglas del cortafuegos. Se configuran reglas en la interfaz **WAN** para controlar exactamente qué tráfico está permitido hacia los servidores internos y qué se bloquea.
+
+La política aplicada sigue el principio de **mínimo privilegio**: se permite únicamente el tráfico estrictamente necesario para el funcionamiento de los servicios y se bloquea todo lo demás por defecto.
+
+#### Regla 1: Permitir DNS desde WAN al servidor Ubuntu
+
+Se crea una regla que permite el tráfico **UDP** en el puerto **53 (DNS)** desde la red `192.168.100.0` hacia el servidor Ubuntu (`192.168.100.100`), para que los clientes de la red puedan resolver nombres a través del servidor DNS de la infraestructura.
+
+<img src="img/pfsense/cap17.png">
+
+> Configuración de la regla de firewall para permitir tráfico DNS (UDP puerto 53) desde la red WAN hacia el servidor Ubuntu. Se especifican la interfaz WAN, el protocolo UDP y los puertos de origen y destino.
+
+<img src="img/pfsense/cap18.png">
+
+> Detalle del destino de la regla DNS: tráfico dirigido a `192.168.100.100` (servidor Ubuntu) en el puerto 53. La descripción `"permitir DHCP/DNS desde WAN a ubuntu server"` deja claro el propósito de la regla.
+
+#### Regla 2: Permitir SSH al servidor Ubuntu
+
+Se crea una regla que permite el tráfico **TCP** en el puerto **22 (SSH)** desde la red `192.168.100.0` hacia el servidor Ubuntu (`192.168.100.100`), necesaria para poder administrar el servidor de forma remota a través del firewall.
+
+<img src="img/pfsense/cap19.png">
+
+> Configuración de la regla de firewall para permitir SSH (TCP puerto 22) desde la red `192.168.100.0` hacia el servidor Ubuntu `192.168.100.100`.
+
+<img src="img/pfsense/cap20.png">
+
+> Descripción de la regla SSH: `"Permitir SSH a ubuntu server"`. Una vez guardada, esta regla permite la administración remota del servidor de forma controlada y segura.
+
+#### Regla 3: Denegación por defecto
+
+La última regla es una regla de **bloqueo total** que actúa como política de seguridad por defecto: cualquier tráfico que no haya sido permitido explícitamente por las reglas anteriores será descartado silenciosamente. Esta regla es la que garantiza que el firewall no deje pasar nada que no hayamos autorizado de forma explícita.
+
+<img src="img/pfsense/cap21.png">
+
+> Regla de denegación por defecto: acción **Block**, protocolo **Any**, origen y destino **Any**. Descripción: `"Denegacion por defecto, bloquear todo el otro trafico"`.
+
+---
+
+### Resultado final de las reglas
+
+Con las tres reglas configuradas, el firewall queda con la siguiente política de acceso en la interfaz WAN:
+
+| Acción | Protocolo | Origen | Destino | Puerto | Descripción |
+|--------|-----------|--------|---------|--------|-------------|
+| Block | - | Reserved/Bogon | * | * | Block bogon networks (por defecto) |
+| Block | IPv4 Any | Any | Any | * | Denegación por defecto |
+| Pass | IPv4 TCP | 192.168.100.0 | 192.168.100.100 | 22 (SSH) | Permitir SSH a ubuntu server |
+| Pass | IPv4 UDP | 192.168.100.0 | 192.168.100.100 | 53 (DNS) | Permitir DHCP/DNS desde WAN |
+
+<img src="img/pfsense/cap22.png">
+
+> Vista final de las reglas WAN en pfSense con los cambios aplicados correctamente. Se observan las cuatro reglas activas: bloqueo de redes bogon, denegación por defecto, permiso de SSH y permiso de DNS hacia el servidor Ubuntu.
+
+<div style="page-break-after: always;"></div>
+
+---
 
 ## Web – Página corporativa con Web4Pro
 
 ### Descripción
+
+"M"e gustaria que destacar que esta pagina web la he hecho para la empresa en la que estaba haciendo mis practicas laborales y esta 100% operativa"
 
 Como parte del proyecto, se desarrolla una página web corporativa utilizando el CMS **Web4Pro**. Este gestor de contenidos permite crear y administrar páginas web de forma sencilla y profesional, sin necesidad de programar desde cero, adaptándose perfectamente a las necesidades de una pequeña o mediana empresa.
 
@@ -628,7 +856,9 @@ Desde el montaje físico del servidor con componentes reciclados hasta la config
 
 - Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en diferentes ambitos desde la ciberseguridad hasta infraestructura en una red 
 
-- El desarrollo de la **página web** con un CMS en mi estadia en la empresa me ayudo a ganar experiencia en el ambito de el desarroyp web.
+- La implementacion de un **firewall** con pfsense fue sin duda la parte que mas me apasiono de este proyecto, ya que he aprendido a gestionar reglas de un firewall que se podria usar de manera profesional
+
+- El desarrollo de la **página web** con un CMS en mi estadia en la empresa me ayudo a ganar experiencia en el ambito de el desarroyo web.
 
 - El uso de **hardware reciclado** no solo supuso un ahorro económico considerable, sino que también reforzó la conciencia sobre la sostenibilidad en el sector tecnológico.
 
@@ -659,3 +889,5 @@ A continuación se muestran imágenes del hardware utilizado en el servidor. Tod
 > Vista del conjunto completo: fuente de alimentación 750W 80 Plus Bronze, SSD de 500 GB y cableado interno del equipo.
 
 ---
+
+-- Trabajo hecho y maquetado por Jairo Mosteiro campos con motivo de su proyecto intermodular en SMR
