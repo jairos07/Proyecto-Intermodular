@@ -113,6 +113,8 @@
 
 - Además, el proyecto incorpora un servidor Windows Server sobre el cual se configura Active Directory Domain Services (AD DS) junto con Políticas de Grupo (GPOs), que permiten gestionar de forma centralizada los equipos y usuarios que forman parte del dominio empresarial.
 
+- Se implementa tambien una automatizacion con ansible para que sea mas sencillo desplegar diferentes maquinas virtuales con mas servicios en el nodo de proxmox
+
 - Un aspecto destacado del proyecto es que todo el hardware utilizado es de segunda mano o reciclado, lo que reduce significativamente los costes de implementación y fomenta la sostenibilidad y el aprovechamiento de recursos. De este modo, el servidor se presenta como una alternativa accesible para pequeñas empresas que no disponen de un gran presupuesto tecnológico.
 
 - En conjunto, este servidor multitarea permite a la empresa que lo implemente disponer de gestión de red, servicios web, bases de datos y seguridad, todo centralizado en una única infraestructura, contribuyendo a mejorar la eficiencia, el control y la fiabilidad de su entorno informático.
