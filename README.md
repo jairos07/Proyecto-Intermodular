@@ -26,27 +26,102 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 
 ## Arquitectura del Proyecto
 
-├─────────────────────────────────────────┐
-│       PROXMOX (Hipervisor)              │
-├─────────────────────────────────────────┤
-│                                         │
-│  ├──────────────────┐  ├─────────────┐ │
-│  │ Ubuntu Server    │  │ Windows     │ │
-│  │ (DNS + DHCP)     │  │ Server (AD) │ │
-│  │ 192.168.100.100  │  │   (DC)      │ │
-│  └──────────────────┘  └─────────────┘ │
-│         │                     │         │
-│         └─────────────────────┘         │
-│                 │                       │
-│         ├───────┴────────┐              │
-│         │  Windows       │              │
-│         │  Client        │              │
-│         │  (Unido a AD)  │              │
-│         └────────────────┘              │
-│                                         │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────┐
+│                      ARQUITECTURA DEL PROYECTO                           │
+└──────────────────────────────────────────────────────────────────────────┘
+
+                            INTERNET (WAN)
+                                  │
+                    ┌─────────────▼─────────────┐
+                    │    pfSense Firewall       │
+                    │    Reglas de Seguridad    │
+                    │    - DNS (port 53)        │
+                    │    - DHCP (port 67-68)    │
+                    │    - SSH (port 22)        │
+                    │    - Block Internet       │
+                    └─────────────┬─────────────┘
+                                  │
+                    ┌─────────────▼────────────────────────┐
+                    │    PROXMOX HYPERVISOR                │
+                    │    (192.168.1.100)                   │
+                    │                                      │
+                    │  ┌──────────────────────────────┐   │
+                    │  │  Ubuntu Server               │   │
+                    │  │  192.168.100.100             │   │
+                    │  │  ✓ DNS (bind9)               │   │
+                    │  │  ✓ DHCP (isc-dhcp-server)    │   │
+                    │  └──────────────────────────────┘   │
+                    │                                      │
+                    │  ┌──────────────────────────────┐   │
+                    │  │  Windows Server - AD         │   │
+                    │  │  192.168.100.101             │   │
+                    │  │  ✓ Active Directory          │   │
+                    │  │  ✓ GPOs                      │   │
+                    │  └──────────────────────────────┘   │
+                    │                                      │
+                    │  ┌──────────────────────────────┐   │
+                    │  │  Ubuntu LAB (x3)             │   │
+                    │  │  192.168.1.110-.112          │   │
+                    │  │  ✓ Creadas por Ansible       │   │
+                    │  └──────────────────────────────┘   │
+                    │                                      │
+                    └──────────────────────────────────────┘
+                                  ▲
+                                  │
+                    ┌─────────────┴─────────────┐
+                    │   ANSIBLE AUTOMATION      │
+                    │                           │
+                    │   ✓ Playbooks             │
+                    │   ✓ Inventory             │
+                    │   ✓ SSH a Proxmox         │
+                    └───────────────────────────┘
 
 ## Contenidos del Repositorio
+
+##  Contenidos del Proyecto
+
+### 1. pfSense Firewall
+- Instalación en Proxmox
+- Configuración de interfaces 
+- Reglas de firewall (DNS, DHCP, SSH, Internal)
+- Logging de eventos
+- Topología: aislamiento de red + control de tráfico
+
+### 2. Ubuntu Server - Servicios de Red
+- DNS (bind9) - resolución de nombres smr.local
+- DHCP (isc-dhcp-server) - asignación de IPs 192.168.100.0/24
+- Configuración Netplan - IP estática 192.168.100.100
+- Verificación con nslookup y dhclient
+
+### 3. Windows Server - Active Directory
+- Instalación y configuración de AD DS
+- Creación de dominio server.local
+- Unidades Organizativas (OUs)
+- Usuarios y grupos de seguridad
+- Políticas de Grupo (GPOs) - personalización corporativa
+- Windows Client unido al dominio
+
+### 4. Ansible - Infraestructura como Código (IaC)
+- Automatización de creación de VMs en Proxmox
+- Playbook: ubuntu-vms.yml (3 máquinas en paralelo)
+- Inventory: configuración de proxmox.yml
+- Resultado: 3 VMs en 5 minutos vs 45 minutos manual
+- Reducción de tiempo: 80%
+
+###  Arquitectura Completa
+- Proxmox como hipervisor
+- pfSense como firewall perimetral
+- Ubuntu Server como hub de servicios de red
+- Windows AD como gestión centralizada
+- Ansible como motor de automatización
+
+###  Competencias Demostradas
+✓ Virtualización (Proxmox/KVM)
+✓ Administración de Linux (DNS, DHCP)
+✓ Directorio Activo y GPOs
+✓ Seguridad de red (firewall, reglas)
+✓ Infrastructure as Code (Ansible/YAML)
+✓ Documentación técnica
 
 ### Documentación
 - `Proyecto_Jairo_Mosteiro_Campos.pdf` - Documento oficial completo del proyecto
@@ -76,50 +151,32 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 - Verificación de GPOs aplicadas
 - Validación de políticas de seguridad
 
-#### 4. Página Web Corporativa
+#### 4. Firewall Pfsense
+- Configuracion de firewall pfsense
+- Reglas custom
+- Loggin de eventos
+- Configuraccion de adaptadores
+
+#### 5.Ansible
+- Automatización de creación de VMs en Proxmox
+- Playbook: ubuntu-vms.yml (3 máquinas en paralelo)
+- Inventory: configuración de proxmox.yml
+
+#### 6. Página Web Corporativa
 - Implementación con Web4Pro CMS
 - Layout corporativo profesional
 - Búsqueda disponible en "piezasdeinformatica"
 
-## Cómo Usar Este Proyecto
+## Cómo desplegar los servicios
 
 ### Requisitos
 - Proxmox (o virtualización similar)
 - Ubuntu Server 20.04 LTS o superior
 - Windows Server 2019/2022
 - Windows 10/11 para cliente
+- pfsense para firewall
+- Software ansible + conectarlo a proxmox
 
-### Instalación Rápida
-
-1. **Ubuntu Server - DNS y DHCP**
-
-```bash
-sudo apt update
-sudo apt install bind9 bind9-utils isc-dhcp-server
-
-# Configurar archivos según documentación
-sudo systemctl restart bind9
-sudo systemctl restart isc-dhcp-server
-```
-
-2. **Windows Server - Active Directory**
-- Seguir instalación desde GUI (Server Manager)
-- Promocionar a DC
-- Configurar GPOs según necesidades
-
-3. **Windows Client**
-- Configurar DNS -> IP del servidor AD
-- Unirse al dominio
-- Validar con `gpresult /r`
-
-## Funcionalidades Implementadas
-
-- Asignación automática de IPs (DHCP)
-- Resolución de nombres internos (DNS)
-- Gestión centralizada de usuarios (AD)
-- Aplicación automática de políticas de seguridad (GPOs)
-- Aislamiento de recursos por departamento (OUs)
-- Página web corporativa públicamente accesible
 
 ## Sostenibilidad
 
@@ -138,6 +195,8 @@ Ahorro estimado: ~70% vs. soluciones nuevas equivalentes
 - Todas las pruebas de conectividad correctas
 - GPOs aplicadas correctamente en clientes
 - Servicios estables y en producción
+- Firewall funcional 
+- Automatizaciones para optimizacion de tiempo
 - Fácil mantenimiento y escalabilidad
 
 ## Aprendizajes Clave
@@ -146,9 +205,10 @@ Ahorro estimado: ~70% vs. soluciones nuevas equivalentes
 2. Configuración de servicios de red (DNS, DHCP)
 3. Implementación de Active Directory
 4. Gestión de Políticas de Grupo en Windows
-5. Planificación de infraestructura IT empresarial
-6. Importancia de la documentación técnica
-7. Sostenibilidad en tecnología
+5. Gestion y instalacion de firewall pfsense
+6. Planificación de infraestructura IT empresarial
+7. Importancia de la documentación técnica
+8. Sostenibilidad en tecnología
 
 ## Documentación Técnica
 
