@@ -96,8 +96,17 @@
       - [Regla 2: Permitir SSH al servidor Ubuntu](#regla-2-permitir-ssh-al-servidor-ubuntu)
       - [Regla 3: Denegación por defecto](#regla-3-denegación-por-defecto)
     - [Resultado final de las reglas](#resultado-final-de-las-reglas)
-  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+  - [Redundancia y Copias de Seguridad – NAS Buffalo + Proxmox](#redundancia-y-copias-de-seguridad--nas-buffalo--proxmox)
     - [Descripción](#descripción-5)
+    - [Hardware: NAS Buffalo TeraStation TS3210D](#hardware-nas-buffalo-terastation-ts3210d)
+    - [Configuración del RAID](#configuración-del-raid)
+    - [Compartición de archivos y protocolo NFS](#compartición-de-archivos-y-protocolo-nfs)
+    - [Configuración de red del NAS](#configuración-de-red-del-nas)
+    - [Integración con Proxmox: tarea de backup en nodo `pve`](#integración-con-proxmox-tarea-de-backup-en-nodo-pve)
+    - [Verificación: discos incluidos en los backups](#verificación-discos-incluidos-en-los-backups)
+    - [Resumen de la política de copias de seguridad](#resumen-de-la-política-de-copias-de-seguridad)
+  - [Web – Página corporativa con Web4Pro](#web--página-corporativa-con-web4pro)
+    - [Descripción](#descripción-6)
     - [Layout de la página](#layout-de-la-página)
   - [**Conclusion**](#conclusion)
   - [**Glosario**](#glosario)
@@ -824,11 +833,102 @@ Con las tres reglas configuradas, el firewall queda con la siguiente política d
 
 ---
 
+## Redundancia y Copias de Seguridad – NAS Buffalo + Proxmox
+
+### Descripción
+
+Una infraestructura de servidor para una pequeña o mediana empresa no está completa sin una política de **copias de seguridad** que garantice la **continuidad del negocio** ante un fallo de hardware, un error humano o cualquier incidente imprevisto. Para dar respuesta a esta necesidad, se ha integrado en el proyecto un NAS Buffalo TeraStation TS3210D que actúa como destino centralizado de todos los backups de las máquinas virtuales alojadas en el nodo Proxmox (`pve`).
+
+Al igual que el resto del hardware del proyecto, el NAS ha sido adquirido de **segunda mano con los discos incluidos**, lo que encaja directamente con la filosofía de reutilización y reducción de costes que caracteriza a esta infraestructura. A pesar de ser hardware de segunda mano, el dispositivo se encuentra en perfecto estado de funcionamiento y ofrece todas las capacidades necesarias para una política de backups profesional.
+
+La tarea de backup está programada para ejecutarse automáticamente cada domingo de madrugada, sin necesidad de intervención manual, garantizando que todas las máquinas virtuales del proyecto quedan respaldadas de forma periódica y consistente.
+
+---
+
+### Hardware: NAS Buffalo TeraStation TS3210D
+
+El dispositivo utilizado como almacenamiento centralizado de backups es un **Buffalo TeraStation TS3210D**, un NAS de nivel profesional orientado a pequeñas empresas, adquirido de **segunda mano con sus discos originales incluidos**. Esta decisión es coherente con la filosofía general del proyecto: aprovechar hardware en buen estado a un coste muy inferior al de un dispositivo nuevo, sin sacrificar funcionalidad ni fiabilidad. Se conecta a la red local a través de su interfaz **LAN 2** con la IP estática `192.168.1.195`, accesible desde el nodo Proxmox.
+
+<img src="img/NAS/cap1.png">
+
+> En esta captura se puede ver el **panel de control principal del NAS Buffalo TeraStation TS3210D**. Se muestra el estado general del sistema sin eventos activos (indicado en verde), la información del sistema (modelo TS3210D7E4, firmware 5.00-0.07), el estado del almacenamiento con la **Matriz 1 en RAID 1** con 203,4 GB utilizados de 1830,3 GB disponibles, y los datos de red con la IP `192.168.1.195` a 1000 Mbps.
+>
+
+
+---
+
+### Configuración del RAID
+
+El NAS tiene configurada una **Matriz RAID 1** compuesta por dos unidades de disco. El RAID 1 (también llamado mirroring o espejo) duplica los datos en tiempo real en ambos discos: si uno falla, el otro contiene una copia íntegra y el sistema puede seguir funcionando sin pérdida de datos. El sistema de archivos utilizado es **XFS**, adecuado para grandes volúmenes de datos y cargas de escritura continua como las que generan los backups de máquinas virtuales.
+
+<img src="img/NAS/cap3.png">
+
+
+---
+
+### Compartición de archivos y protocolo NFS
+
+Para que Proxmox pueda montar el almacenamiento del NAS como un **Storage externo**, el NAS expone sus carpetas compartidas mediante **NFS (Network File System)**, el protocolo estándar en entornos Linux y el que recomienda Proxmox para almacenamiento remoto de backups.
+
+<img src="img/NAS/cap2.png">
+
+
+---
+
+### Configuración de red del NAS
+
+En esta captura se muestra la configuración de **red del NAS**, donde se puede ver que la dirección IP asignada es `192.168.1.195` a través del puerto **LAN 2**. Esta IP estática es la que se configura como destino en las tareas de backup de Proxmox. También se observan otras opciones disponibles como servidor proxy, grupo de trabajo y SNMP.
+
+<img src="img/NAS/cap4.png">
+
+
+
+
+---
+
+### Integración con Proxmox: tarea de backup en nodo `pve`
+
+En el nodo principal **`pve`** se ha configurado una tarea de backup automática que respalda todas las máquinas virtuales al NAS (`buffalo-nas`) cada domingo a las **05:00h**. Se utiliza compresión **ZSTD** (rápida y eficiente) y modo **Snapshot**, que permite hacer el backup de una VM aunque esté en ejecución sin necesidad de apagarla.
+
+<img src="img/NAS/cap5.png">
+
+
+---
+
+### Verificación: discos incluidos en los backups
+
+Para confirmar que todos los discos de cada VM están cubiertos por la política de backup, Proxmox permite visualizar el detalle de cada tarea mostrando los discos incluidos y su estado.
+
+<img src="img/NAS/cap6.png">
+
+
+---
+
+### Resumen de la política de copias de seguridad
+
+| Parámetro | Valor |
+|---|---|
+| Dispositivo | Buffalo TeraStation TS3210D (segunda mano) |
+| Destino | buffalo-nas (192.168.1.195) |
+| Protocolo | NFS |
+| Horario | Domingos a las 05:00h |
+| Compresión | ZSTD |
+| Modo | Snapshot (sin parar las VMs) |
+| VMs cubiertas | 10 VMs del nodo `pve` |
+| RAID del NAS | RAID 1 (espejo, 2 discos) |
+| Capacidad total | 1830 GB (89% disponible) |
+
+Esta política garantiza que, ante cualquier fallo en el servidor principal, todas las máquinas virtuales pueden restaurarse desde el NAS en un tiempo mínimo, asegurando la **continuidad del servicio** para la empresa.
+
+<div style="page-break-after: always;"></div>
+
+---
+
 ## Web – Página corporativa con Web4Pro
 
 ### Descripción
 
-"M"e gustaria que destacar que esta pagina web la he hecho para la empresa en la que estaba haciendo mis practicas laborales y esta 100% operativa"
+"Me gustaria que destacar que esta pagina web la he hecho para la empresa en la que estaba haciendo mis practicas laborales y esta 100% operativa"
 
 Como parte del proyecto, se desarrolla una página web corporativa utilizando el CMS **Web4Pro**. Este gestor de contenidos permite crear y administrar páginas web de forma sencilla y profesional, sin necesidad de programar desde cero, adaptándose perfectamente a las necesidades de una pequeña o mediana empresa.
 
@@ -840,7 +940,6 @@ La página web de la empresa es de acceso público y puede visitarse buscando **
 
 <img src="img/WEB/layout.png">
 
-> Vista general del layout de la página web corporativa, donde se puede apreciar la estructura y disposición de los elementos que componen la web.
 
 <div style="page-break-after: always;"></div>
 
@@ -859,6 +958,8 @@ Desde el montaje físico del servidor con componentes reciclados hasta la config
 - Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en diferentes ambitos desde la ciberseguridad hasta infraestructura en una red 
 
 - La implementacion de un **firewall** con pfsense fue sin duda la parte que mas me apasiono de este proyecto, ya que he aprendido a gestionar reglas de un firewall que se podria usar de manera profesional
+
+- La integración de un **NAS Buffalo de segunda mano con RAID 1** como destino centralizado de backups automáticos en Proxmox me ha permitido comprender la importancia de la continuidad del negocio y cómo se implementa una política de copias de seguridad real en un entorno empresarial, además de reforzar la filosofía de reutilización de hardware que caracteriza a todo el proyecto.
 
 - El desarrollo de la **página web** con un CMS en mi estadia en la empresa me ayudo a ganar experiencia en el ambito de el desarroyo web.
 
