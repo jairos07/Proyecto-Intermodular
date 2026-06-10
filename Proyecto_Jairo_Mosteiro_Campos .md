@@ -306,7 +306,7 @@ La elección de Windows Server para este rol se debe a que es el estándar de la
 
 > Instalación del rol **Active Directory Domain Services** desde el Administrador del Servidor. Este rol es el núcleo de toda la infraestructura de directorio.
 
-<img src="Windows-server/dominio2.png">
+<img src="img/Windows-server/dominio2.png">
 
 > Promoción del servidor a **Controlador de Dominio** y creación del nuevo bosque/dominio. Se especifica el nombre del dominio interno de la empresa (por ejemplo, `empresa.local`).
 
@@ -972,19 +972,15 @@ A continuación se muestran imágenes del hardware utilizado en el servidor. Tod
 
 <img src="img/Hardware/IMG_2316.jpg">
 
-> Vista general del interior del equipo servidor con los componentes montados.
 
 <img src="img/Hardware/IMG_2317.jpg">
 
-> Detalle de la placa base Gigabyte GA-AB350-Gaming 3 con el procesador AMD Ryzen 5 3400G instalado.
 
 <img src="img/Hardware/IMG_2318.jpg">
 
-> Módulos de memoria RAM DDR4 instalados en la placa base (32 GB en total).
 
 <img src="img/Hardware/IMG_2319.jpg">
 
-> Vista del conjunto completo: fuente de alimentación 750W 80 Plus Bronze, SSD de 500 GB y cableado interno del equipo.
 
 ---
 
