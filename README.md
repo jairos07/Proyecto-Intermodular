@@ -11,6 +11,7 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 - Políticas de Grupo: GPOs para gestión centralizada de usuarios y equipos
 - Presencia Web: Página corporativa con Web4Pro
 - Seguridad: Firewall con pfSense
+- Redundancia: Copias de seguridad automáticas en NAS Buffalo TeraStation (segunda mano, RAID 1)
 - Sostenibilidad: Componentes 100% reciclados y de segunda mano
 
 ## Componentes Hardware
@@ -23,6 +24,7 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 | Fuente | 750W 80 Plus Bronze |
 | Placa Base | Gigabyte GA-AB350-Gaming 3 |
 | Gabinete | Reciclado de equipo antiguo |
+| NAS | Buffalo TeraStation TS3210D (segunda mano, con discos incluidos) |
 
 ## Arquitectura del Proyecto
 
@@ -65,6 +67,15 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
                     │  │  ✓ Creadas por Ansible       │   │
                     │  └──────────────────────────────┘   │
                     │                                      │
+                    └──────────────────┬───────────────────┘
+                                       │
+                    ┌──────────────────▼───────────────────┐
+                    │   NAS Buffalo TeraStation TS3210D    │
+                    │   192.168.1.195 (segunda mano)       │
+                    │   ✓ RAID 1 (espejo, 2 discos)        │
+                    │   ✓ 1830 GB disponibles              │
+                    │   ✓ Backups automáticos de todas     │
+                    │     las VMs del nodo pve             │
                     └──────────────────────────────────────┘
                                   ▲
                                   │
@@ -121,6 +132,7 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 ✓ Directorio Activo y GPOs
 ✓ Seguridad de red (firewall, reglas)
 ✓ Infrastructure as Code (Ansible/YAML)
+✓ Copias de seguridad y redundancia (NAS, RAID 1)
 ✓ Documentación técnica
 
 ### Documentación
@@ -167,6 +179,15 @@ Este proyecto implementa un servidor multitarea completo que proporciona:
 - Layout corporativo profesional
 - Búsqueda disponible en "piezasdeinformatica"
 
+#### 7. Redundancia y Copias de Seguridad – NAS Buffalo
+- NAS Buffalo TeraStation TS3210D adquirido de segunda mano con discos incluidos
+- RAID 1 (espejo) con 1830 GB de capacidad total
+- Integración con Proxmox como Storage externo vía NFS
+- Tarea de backup automática cada domingo a las 05:00h
+- Modo Snapshot: backup sin apagar las VMs
+- Compresión ZSTD para mayor eficiencia
+- Cubre las 10 VMs del nodo pve
+
 ## Cómo desplegar los servicios
 
 ### Requisitos
@@ -197,6 +218,7 @@ Ahorro estimado: ~70% vs. soluciones nuevas equivalentes
 - Servicios estables y en producción
 - Firewall funcional 
 - Automatizaciones para optimizacion de tiempo
+- Copias de seguridad automáticas operativas en NAS RAID 1
 - Fácil mantenimiento y escalabilidad
 
 ## Aprendizajes Clave
@@ -206,8 +228,8 @@ Ahorro estimado: ~70% vs. soluciones nuevas equivalentes
 3. Implementación de Active Directory
 4. Gestión de Políticas de Grupo en Windows
 5. Gestion y instalacion de firewall pfsense
-6. Planificación de infraestructura IT empresarial
-7. Importancia de la documentación técnica
+6. Copias de seguridad y redundancia con NAS y RAID 1
+7. Planificación de infraestructura IT empresarial
 8. Sostenibilidad en tecnología
 
 ## Documentación Técnica

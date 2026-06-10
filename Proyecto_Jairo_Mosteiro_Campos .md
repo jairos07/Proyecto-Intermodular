@@ -116,9 +116,10 @@
 
 ## **Descripcion** 
 
-- Este proyecto consiste en el diseño e implementación de un servidor multitarea orientado a pequeñas y medianas empresas (PYMES), cuyo objetivo principal es ofrecer una solución integral, económica y funcional para la gestión de los servicios básicos de una red empresarial.
+- Este proyecto consiste en el diseño e implementación de un servidor multitarea orientado a pequeñas y medianas empresas (PYMES), cuyo objetivo principal es ofrecer una solución integral, económica y funcional para la gestión de los servicios básicos de una red empresarial, toda configuracion esta subida a mi repositorio de Github paso por paso: https://github.com/jairos07/Proyecto-Intermodular.
 
 - La infraestructura del servidor se compone de varios sistemas y servicios que trabajan de forma conjunta. En primer lugar, se utiliza proxmox para virtualizar los SO, pfsense como firewall, un servidor basado en Ubuntu Server, encargado de proporcionar los servicios de DNS (Domain Name System) y DHCP (Dynamic Host Configuration Protocol). Estos servicios permiten, respectivamente, la correcta resolución de nombres dentro de la red y la asignación automática de direcciones IP a los dispositivos conectados, facilitando así la administración y organización de la red interna de la empresa.
+- Para añadir redundancia y seguridad el servidor tambien consta de un NAS que cada domingo hara una copia diferencial de todas las maquinas virtuales de proxmox
 
 - Además, el proyecto incorpora un servidor Windows Server sobre el cual se configura Active Directory Domain Services (AD DS) junto con Políticas de Grupo (GPOs), que permiten gestionar de forma centralizada los equipos y usuarios que forman parte del dominio empresarial.
 
@@ -162,7 +163,6 @@
   
   En este apartado hablaré sobre los servidores virtualizados que tenemos en nuestro servidor principal y el porqué he escogido cada uno de estos para cada tarea.
 
-<div style="page-break-after: always;"></div>
 
 ---
 
@@ -622,11 +622,6 @@ Las máquinas están completamente funcionales y conectadas a la red.
    - Documentación automática
    - Recuperación ante desastres (disaster recovery)
 
-6. **Demanda**: Ansible es una skill altamente demandada en:
-   - Roles de Security Engineer
-   - Equipos DevOps
-   - Administración de infraestructura
-   - Automatización de seguridad
 
 <div style="page-break-after: always;"></div>
 
@@ -851,9 +846,6 @@ El dispositivo utilizado como almacenamiento centralizado de backups es un **Buf
 
 <img src="img/NAS/cap1.png">
 
-> En esta captura se puede ver el **panel de control principal del NAS Buffalo TeraStation TS3210D**. Se muestra el estado general del sistema sin eventos activos (indicado en verde), la información del sistema (modelo TS3210D7E4, firmware 5.00-0.07), el estado del almacenamiento con la **Matriz 1 en RAID 1** con 203,4 GB utilizados de 1830,3 GB disponibles, y los datos de red con la IP `192.168.1.195` a 1000 Mbps.
->
-
 
 ---
 
@@ -932,6 +924,8 @@ Esta política garantiza que, ante cualquier fallo en el servidor principal, tod
 
 Como parte del proyecto, se desarrolla una página web corporativa utilizando el CMS **Web4Pro**. Este gestor de contenidos permite crear y administrar páginas web de forma sencilla y profesional, sin necesidad de programar desde cero, adaptándose perfectamente a las necesidades de una pequeña o mediana empresa.
 
+Por motivos de seguridad no puedo facilitar ningun tipo de imagen de el dashboard de la web
+
 La página web de la empresa es de acceso público y puede visitarse buscando **"piezasdeinformatica"** en cualquier navegador.
 
 ---
@@ -940,6 +934,7 @@ La página web de la empresa es de acceso público y puede visitarse buscando **
 
 <img src="img/WEB/layout.png">
 
+En la implementacion de esta pagina web he aprendido a utilizar un nuevo CMS como es Web4pro ademas de tocar los estilos de la pagina con CSS, habilitar politicas en la web, pasarelas de pago con Redsys y implementacion de imagenes textos publicitarios indices y en general la distribucion de la pagina,
 
 <div style="page-break-after: always;"></div>
 
@@ -955,11 +950,11 @@ Desde el montaje físico del servidor con componentes reciclados hasta la config
 
 - La implementación de **Active Directory** en Windows Server fue especialmente significativa, ya que es una tecnología ampliamente utilizada en el mundo laboral. Comprender cómo funciona la gestión centralizada de usuarios, equipos y políticas me ha dado una perspectiva más clara de cómo se administran las redes empresariales reales.
 
-- Esta solución de automatización demuestra cómo Ansible mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en diferentes ambitos desde la ciberseguridad hasta infraestructura en una red 
+- Esta solución de automatización demuestra cómo **Ansible** mejora significativamente la eficiencia operacional, un aspecto crítico en entornos empresariales y de ciberseguridad. La capacidad de provisionar infraestructura de forma rápida, consistente y reproducible es fundamental en diferentes ambitos desde la ciberseguridad hasta infraestructura en una red 
 
-- La implementacion de un **firewall** con pfsense fue sin duda la parte que mas me apasiono de este proyecto, ya que he aprendido a gestionar reglas de un firewall que se podria usar de manera profesional
+- La implementacion de un **firewall** con pfsense fue sin duda la parte que mas me apasiono de este proyecto, ya que he aprendido a gestionar reglas de un firewall que se podria usar de manera profesional.
 
-- La integración de un **NAS Buffalo de segunda mano con RAID 1** como destino centralizado de backups automáticos en Proxmox me ha permitido comprender la importancia de la continuidad del negocio y cómo se implementa una política de copias de seguridad real en un entorno empresarial, además de reforzar la filosofía de reutilización de hardware que caracteriza a todo el proyecto.
+- La integración de un **NAS con RAID 1** como destino centralizado de backups automáticos en Proxmox me ha permitido comprender la importancia de la continuidad del servidor y cómo se implementa una política de copias de seguridad real en un entorno empresarial, además de reforzar la filosofía de reutilización de hardware que caracteriza a todo el proyecto.
 
 - El desarrollo de la **página web** con un CMS en mi estadia en la empresa me ayudo a ganar experiencia en el ambito de el desarroyo web.
 
